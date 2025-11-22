@@ -187,5 +187,8 @@ int main() {
     }
 
     printf("Game Over! Final Score: %d\n", score);
+    getchar();
+    getchar();
+
     return 0;
 }
