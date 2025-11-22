@@ -33,35 +33,61 @@ void setCursorPosition(int xPos, int yPos) {
 
 // ****** MENU FUNCTION ******
 void ShowMenu() {
-    int choice;
     while (1) {
         system("cls");
-        printf("====== SNAKE GAME ======\n");
-        printf("1. Start Game\n");
-        printf("2. Instructions\n");
-        printf("3. Exit\n");
-        printf("========================\n");
-        printf("Choose an option: ");
 
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+        int consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+        // Helper for centering
+        #define CENTER_TEXT(msg) { \
+            int pad = (consoleWidth - strlen(msg)) / 2; \
+            if (pad < 0) pad = 0; \
+            for (int i = 0; i < pad; i++) printf(" "); \
+            printf("%s\n", msg); \
+        }
+
+        CENTER_TEXT("====== SNAKE GAME ======");
+        CENTER_TEXT("1. Start Game");
+        CENTER_TEXT("2. Instructions");
+        CENTER_TEXT("3. Exit");
+        CENTER_TEXT("========================");
+        printf("\n");
+
+        char prompt[] = "Choose an option: ";
+        int padPrompt = (consoleWidth - strlen(prompt)) / 2;
+        if (padPrompt < 0) padPrompt = 0;
+        for (int i = 0; i < padPrompt; i++) printf(" ");
+        printf("%s", prompt);
+
+        int choice;
         scanf("%d", &choice);
 
         switch (choice) {
-        case 1:
-            return;
-        case 2:
-            system("cls");
-            printf("=== Instructions ===\n");
-            printf("Use keys:\n");
-            printf("W - Up\nA - Left\nS - Down\nD - Right\n");
-            printf("X - Quit the game\n\n");
-            printf("Press any key to return...");
-            _getch();
-            break;
-        case 3:
-            exit(0);
-        default:
-            printf("Invalid choice! Press any key...");
-            _getch();
+            case 1:
+                return;
+
+            case 2:
+                system("cls");
+                CENTER_TEXT("=== Instructions ===");
+                CENTER_TEXT("Use keys:");
+                CENTER_TEXT("W - Up");
+                CENTER_TEXT("A - Left");
+                CENTER_TEXT("S - Down");
+                CENTER_TEXT("D - Right");
+                CENTER_TEXT("X - Quit the game");
+                printf("\n");
+                CENTER_TEXT("Press any key to return...");
+                _getch();
+                break;
+
+            case 3:
+                exit(0);
+
+            default:
+                CENTER_TEXT("Invalid choice! Press any key...");
+                _getch();
         }
     }
 }
@@ -79,13 +105,26 @@ void Setup() {
 }
 
 void Draw() {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+
+    int consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+    int boardWidth = WIDTH + 2;          // game width + borders
+    int padding = (consoleWidth - boardWidth) / 2;
+    if (padding < 0) padding = 0;        // safety
+
     setCursorPosition(0, 0);
 
-    for (int i = 0; i < WIDTH + 2; i++)
-        printf("#");
+    // Top border
+    for (int p = 0; p < padding; p++) printf(" ");
+    for (int i = 0; i < boardWidth; i++) printf("#");
     printf("\n");
 
+    // Board rows
     for (int i = 0; i < HEIGHT; i++) {
+        for (int p = 0; p < padding; p++) printf(" ");
+
         for (int j = 0; j < WIDTH; j++) {
             if (j == 0)
                 printf("#");
@@ -103,8 +142,7 @@ void Draw() {
                         break;
                     }
                 }
-                if (!print)
-                    printf(" ");
+                if (!print) printf(" ");
             }
 
             if (j == WIDTH - 1)
@@ -113,11 +151,19 @@ void Draw() {
         printf("\n");
     }
 
-    for (int i = 0; i < WIDTH + 2; i++)
-        printf("#");
+    // Bottom border
+    for (int p = 0; p < padding; p++) printf(" ");
+    for (int i = 0; i < boardWidth; i++) printf("#");
     printf("\n");
 
-    printf("Score: %d\n", score);
+    // Centered Score
+    char scoreText[50];
+    sprintf(scoreText, "Score: %d", score);
+    int scorePadding = (consoleWidth - (int)strlen(scoreText)) / 2;
+    if (scorePadding < 0) scorePadding = 0;
+
+    for (int p = 0; p < scorePadding; p++) printf(" ");
+    printf("%s\n", scoreText);
 }
 
 void Input() {
